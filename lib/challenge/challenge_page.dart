@@ -2,6 +2,7 @@ import 'package:devquiz/challenge/widgets/next_button/next_button_widget.dart';
 import 'package:devquiz/challenge/widgets/question_indicator/question_indicator_widget.dart';
 import 'package:devquiz/challenge/widgets/quiz/quiz_widget.dart';
 import 'package:devquiz/core/app_colors.dart';
+import 'package:devquiz/result_page/result_page.dart';
 import 'package:devquiz/shared/models/question_model.dart';
 import 'package:flutter/material.dart';
 
@@ -9,7 +10,9 @@ import 'challenge_controller.dart';
 
 class ChallengePage extends StatefulWidget {
   final List<QuestionModel> questions;
-  const ChallengePage({Key? key, required this.questions}) : super(key: key);
+  final String title;
+  const ChallengePage({Key? key, required this.questions, required this.title})
+      : super(key: key);
   @override
   _ChallengePageState createState() => _ChallengePageState();
 }
@@ -28,7 +31,12 @@ class _ChallengePageState extends State<ChallengePage> {
   void nextPage() {
     if (controller.currentPage < widget.questions.length)
       pageController.nextPage(
-          duration: Duration(milliseconds: 200), curve: Curves.bounceIn);
+          duration: Duration(milliseconds: 100), curve: Curves.bounceIn);
+  }
+
+  void onSelected(bool value) {
+    controller.quantityRights++;
+    nextPage();
   }
 
   @override
@@ -62,7 +70,7 @@ class _ChallengePageState extends State<ChallengePage> {
           controller: pageController,
           children: widget.questions
               .map((e) => Quiz(
-                    onChange: nextPage,
+                    onSelected: onSelected,
                     question: e,
                   ))
               .toList()),
@@ -91,7 +99,12 @@ class _ChallengePageState extends State<ChallengePage> {
                         Expanded(
                             child: NextButton(
                           onTap: () {
-                            Navigator.of(context).pop();
+                            Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                    builder: (context) => ResultPage(
+                                        result: controller.quantityRights,
+                                        title: widget.title,
+                                        length: widget.questions.length)));
                           },
                           label: 'Concluir',
                           backgroundColor: AppColors.darkGreen,
